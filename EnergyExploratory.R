@@ -21,5 +21,7 @@ histFun(energydata[, -which(names(energydata) %in% facCol)])
 # histogram of glazing area is this really a numeric?
 
 # correlation scatterplot on numerics? potentially group on factors with color and shape...
+library(car)
+scatterplotMatrix(x = energydata, var.labels = colnames(energydata), diagnol = c("histogram", "density"))
 
 # boxplot factors vs. heating load and cooling load, maybe???
