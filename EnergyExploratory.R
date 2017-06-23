@@ -8,15 +8,18 @@ summary(energydata)
 
 # histogram all values are they really numerics? 
 require(ggplot2)
-histFun <- function(dframe, column)
+histFun <- function(x)
 {
-  ggplot(dframe, aes(column)) + geom_histogram()
+  cnames <- names(x)
+  for(i in seq_along(cnames)){
+    print(ggplot(x, aes_string(x = cnames[i])) + geom_histogram())
+  }
 }
 
-lapply(energydata[, -facCol], histFun(energydata, x))
+histFun(energydata[, -which(names(energydata) %in% facCol)])
 
 # histogram of glazing area is this really a numeric?
 
-# correlation scatterplot on numerics, do I need this?
+# correlation scatterplot on numerics? potentially group on factors with color and shape...
 
-# boxplot factors vs. heating load and cooling load
+# boxplot factors vs. heating load and cooling load, maybe???
