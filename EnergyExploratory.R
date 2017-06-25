@@ -51,4 +51,4 @@ corrplot(R, method="color", col=col(200),
          # hide correlation coefficient on the principal diagonal
          diag=FALSE 
 )
-# boxplot factors vs. heating load and cooling load, maybe???
+
