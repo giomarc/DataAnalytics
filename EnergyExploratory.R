@@ -1,7 +1,7 @@
 # read csv
 energydata <- read.csv(file = "EnergyEfficiencyData.csv", header = TRUE)
 head(energydata)
-facCol <- c("Orientation", "Glazing.Area.Distribution")
+facCol <- c("Overall.Height", "Orientation", "Glazing.Area.Distribution")
 energydata[, facCol] <- lapply(energydata[,facCol], as.factor)
 str(energydata)
 summary(energydata)
@@ -52,3 +52,6 @@ corrplot(R, method="color", col=col(200),
          diag=FALSE 
 )
 
+ggplot(energydata, aes(Relative.Compactness, Heating.Load)) + geom_point(aes(color = factor(Overall.Height))) + 
+  xlab('Relative Compactness') + ylab('Heating Load') + 
+  ggtitle('Rel Compt vs. Energy Eff (Heating Load)')
