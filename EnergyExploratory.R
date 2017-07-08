@@ -52,10 +52,27 @@ corrplot(R, method="color", col=col(200),
          diag=FALSE 
 )
 
+ggplot(energydata, aes(Cooling.Load, Heating.Load)) + geom_point(aes(color = factor(Overall.Height)), alpha = 0.3) + 
+  xlab('Cooling Load') + ylab('Heating Load') + 
+  ggtitle('Cooling vs. Heating Load with Height')
+
+ggplot(energydata, aes(Cooling.Load, Heating.Load)) + geom_point(aes(color = factor(Wall.Area)), alpha = 0.3) + 
+  xlab('Cooling Load') + ylab('Heating Load') + 
+  ggtitle('Cooling vs. Heating Load with Wall Area')
+
+ggplot(energydata, aes(Cooling.Load, Heating.Load)) + geom_point(aes(color = factor(Roof.Area)), alpha = 0.3) + 
+  xlab('Cooling Load') + ylab('Heating Load') + 
+  ggtitle('Cooling vs. Heating Load with Roof Area')
+
 ggplot(energydata, aes(Relative.Compactness, Heating.Load)) + geom_point(aes(color = factor(Roof.Area), size = Surface.Area,
                                                                              shape = factor(Overall.Height)), alpha = 0.3) + 
   xlab('Relative Compactness') + ylab('Heating Load') + 
   ggtitle('Rel Compt vs. Energy Eff (Heating Load)')
+
+ggplot(energydata, aes(Surface.Area, Heating.Load)) + geom_point(aes(color = factor(Roof.Area),
+                                                                             shape = factor(Overall.Height)), alpha = 0.3) + 
+  xlab('Surface Area') + ylab('Heating Load') + 
+  ggtitle('SA vs. Energy Eff (Heating Load)')
 
 ggplot(energydata, aes(Relative.Compactness, Cooling.Load)) + geom_point(aes(color = factor(Overall.Height))) + 
   xlab('Relative Compactness') + ylab('Heating Load') + 
@@ -77,5 +94,11 @@ ggplot(energydata, aes(Relative.Compactness, Wall.Area)) + geom_point(aes(color 
 
 ggplot(energydata, aes(Relative.Compactness, Heating.Load)) + geom_point(aes(color = factor(Roof.Area), size = Wall.Area,
                                                                              shape = factor(Overall.Height)), alpha = 0.3) + 
+  xlab('Relative Compactness') + ylab('Heating Load') + 
+  ggtitle('Rel Compt vs. Energy Eff (Heating Load)')
+
+ggplot(energydata, aes(Relative.Compactness, Heating.Load)) + geom_point(aes(color = factor(Roof.Area), size = Surface.Area,
+                                                                             shape = factor(Overall.Height)), alpha = 0.3) + 
+  facet_grid(.~Wall.Area) +
   xlab('Relative Compactness') + ylab('Heating Load') + 
   ggtitle('Rel Compt vs. Energy Eff (Heating Load)')
