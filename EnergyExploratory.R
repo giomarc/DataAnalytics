@@ -52,6 +52,30 @@ corrplot(R, method="color", col=col(200),
          diag=FALSE 
 )
 
-ggplot(energydata, aes(Relative.Compactness, Heating.Load)) + geom_point(aes(color = factor(Overall.Height))) + 
+ggplot(energydata, aes(Relative.Compactness, Heating.Load)) + geom_point(aes(color = factor(Roof.Area), size = Surface.Area,
+                                                                             shape = factor(Overall.Height)), alpha = 0.3) + 
+  xlab('Relative Compactness') + ylab('Heating Load') + 
+  ggtitle('Rel Compt vs. Energy Eff (Heating Load)')
+
+ggplot(energydata, aes(Relative.Compactness, Cooling.Load)) + geom_point(aes(color = factor(Overall.Height))) + 
+  xlab('Relative Compactness') + ylab('Heating Load') + 
+  ggtitle('Rel Compt vs. Energy Eff (Cooling Load)')
+
+ggplot(energydata, aes(Relative.Compactness, Cooling.Load)) + geom_point(aes(color = factor(Overall.Height))) + 
+  xlab('Relative Compactness') + ylab('Heating Load') + 
+  ggtitle('Rel Compt vs. Energy Eff (Cooling Load)')
+
+ggplot(energydata, aes(Relative.Compactness, Surface.Area)) + geom_point(aes(color = factor(Roof.Area), #size = Heating.Load,
+                                                                             shape = factor(Overall.Height)), alpha = 0.3) + 
+  xlab('Relative Compactness') + ylab('Surface Area') + 
+  ggtitle('How Relative Compactness relates \n to Surface Area with \n Height and Roof Area')
+
+ggplot(energydata, aes(Relative.Compactness, Wall.Area)) + geom_point(aes(color = factor(Roof.Area), #size = Heating.Load,
+                                                                             shape = factor(Overall.Height)), alpha = 0.3) + 
+  xlab('Relative Compactness') + ylab('Wall Area') + 
+  ggtitle('How Relative Compactness relates \n to Wall Area with \n Height and Roof Area')
+
+ggplot(energydata, aes(Relative.Compactness, Heating.Load)) + geom_point(aes(color = factor(Roof.Area), size = Wall.Area,
+                                                                             shape = factor(Overall.Height)), alpha = 0.3) + 
   xlab('Relative Compactness') + ylab('Heating Load') + 
   ggtitle('Rel Compt vs. Energy Eff (Heating Load)')
