@@ -64,15 +64,25 @@ ggplot(energydata, aes(Cooling.Load, Heating.Load)) + geom_point(aes(color = fac
   xlab('Cooling Load') + ylab('Heating Load') + 
   ggtitle('Cooling vs. Heating Load with Roof Area')
 
+ggplot(energydata, aes(Cooling.Load, Heating.Load)) + geom_point(aes(color = factor(Glazing.Area)), alpha = 0.3) + 
+  xlab('Cooling Load') + ylab('Heating Load') + 
+  facet_grid(Overall.Height~Roof.Area) +
+  ggtitle('Cooling vs. Heating Load with Glazing Area by Roof Area and Overall Height')
+
+ggplot(energydata, aes(Cooling.Load, Heating.Load)) + geom_point(aes(color = factor(Glazing.Area)), alpha = 0.3) + 
+  xlab('Cooling Load') + ylab('Heating Load') + 
+  facet_grid(Overall.Height~Wall.Area) +
+  ggtitle('Cooling vs. Heating Load with Glazing Area by Wall Area and Overall Height')
+
 ggplot(energydata, aes(Relative.Compactness, Heating.Load)) + geom_point(aes(color = factor(Roof.Area), size = Surface.Area,
                                                                              shape = factor(Overall.Height)), alpha = 0.3) + 
   xlab('Relative Compactness') + ylab('Heating Load') + 
-  ggtitle('Rel Compt vs. Energy Eff (Heating Load)')
+  ggtitle('Relative Compactness vs. Heating Load by Roof area and Height')
 
 ggplot(energydata, aes(Surface.Area, Heating.Load)) + geom_point(aes(color = factor(Roof.Area),
                                                                              shape = factor(Overall.Height)), alpha = 0.3) + 
   xlab('Surface Area') + ylab('Heating Load') + 
-  ggtitle('SA vs. Energy Eff (Heating Load)')
+  ggtitle('Surface Area vs. Heating Load by Roof Area and Height')
 
 ggplot(energydata, aes(Relative.Compactness, Cooling.Load)) + geom_point(aes(color = factor(Overall.Height))) + 
   xlab('Relative Compactness') + ylab('Heating Load') + 
@@ -101,4 +111,4 @@ ggplot(energydata, aes(Relative.Compactness, Heating.Load)) + geom_point(aes(col
                                                                              shape = factor(Overall.Height)), alpha = 0.3) + 
   facet_grid(.~Wall.Area) +
   xlab('Relative Compactness') + ylab('Heating Load') + 
-  ggtitle('Rel Compt vs. Energy Eff (Heating Load)')
+  ggtitle('Relative Compactness vs. Heating Load by Wall Area')
