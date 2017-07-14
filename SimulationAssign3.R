@@ -1,3 +1,5 @@
+require(ggplot2)
+
 sim.Monty <- function(n = 100, build.hist = FALSE){
   
   doors = c(1,2,3)
@@ -25,8 +27,10 @@ sim.Monty <- function(n = 100, build.hist = FALSE){
   sum(simDoors$noSwitchWin)
   
   if (build.hist == TRUE){
-    hist(simDoors$switchWin)
-    hist(simDoors$noSwitchWin)
+    print(ggplot(simDoors, aes(x=switchWin)) + geom_bar())
+    print(ggplot(simDoors, aes(x=noSwitchWin)) + geom_bar())
+    #barplot(simDoors$switchWin)
+    #barplot(simDoors$noSwitchWin)
   }
   
   a <- c(mean(simDoors$switchWin), 
@@ -41,7 +45,7 @@ sim.Monty <- function(n = 100, build.hist = FALSE){
   
   c <- as.data.frame(rbind(a, b))
   row.names(c) <- c("Switching", "No Switching")
-  colnames(c) <- c("mean_winProb", "variance", "Wins", "Losses", "Iterations")
+  colnames(c) <- c("mean_winProb", "variance", "Losses", "Wins", "Iterations")
   
   return(c)
   
