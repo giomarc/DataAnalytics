@@ -130,3 +130,6 @@ lines(density(k_s_rep))
 abline(v = mean(k_s_rep), col = c("red"), lty = 2)
 legend("topright", legend = c("Mean KS"), col = c("red"),lty = 1, cex = 0.8)
 
+## KS Tests
+ks.test(scale(auto.price$price), rnorm(length(auto.price$price), 0, 1), alternative = "two.sided")
+ks.test(scale(auto.price$log.price), rnorm(length(auto.price$log.price), 0, 1), alternative = "two.sided")
