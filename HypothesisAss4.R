@@ -133,3 +133,104 @@ legend("topright", legend = c("Mean KS"), col = c("red"),lty = 1, cex = 0.8)
 ## KS Tests
 ks.test(scale(auto.price$price), rnorm(length(auto.price$price), 0, 1), alternative = "two.sided")
 ks.test(scale(auto.price$log.price), rnorm(length(auto.price$log.price), 0, 1), alternative = "two.sided")
+
+# t-tests
+require(broom)
+require(dplyr)
+require(HistData)
+auto.price %>% group_by(aspiration) %>% do(tidy(t.test(log.price~aspiration, data = auto.price)))
+
+
+# test power of differences and sample sizes
+table(auto.price$aspiration)
+table(auto.price$fuel.type)
+table(auto.price$drive.wheels)
+
+
+require(pwr)
+
+X = seq(from = 0.0, to = 1.5, length.out = 100)
+powers = sapply(X, function(x) 
+  pwr.t.test(n = 20, d = x, sig.level = 0.05, power = NULL,
+             type = "two.sample", alternative = "two.sided")$power)
+
+plot(X, powers, type = 'l', lwd = 2, col = 'red',
+     xlab = 'Difference of means', ylab = 'Power',
+     main = 'Power vs. difference of means')
+
+X = seq(from = 1, to = 200, length.out = 100)
+powers = sapply(X, function(x) 
+  pwr.t.test(n = x, d = 0.5, sig.level = 0.05, power = NULL,
+             type = "two.sample", alternative = "two.sided")$power)
+
+plot(X, powers, type = 'l', lwd = 2, col = 'red',
+     xlab = 'Sample size', ylab = 'Power',
+     main = 'Power vs. sample size')
+
+plot.t <- function(a, b, cols = c('pop_A', 'pop_B'), nbins = 20){
+  maxs = max(c(max(a), max(b)))
+  mins = min(c(min(a), min(b)))
+  breaks = seq(maxs, mins, length.out = (nbins + 1))
+  par(mfrow = c(2, 1))
+  hist(a, breaks = breaks, main = paste('Histogram of', cols[1]), xlab = cols[1])
+  abline(v = mean(a), lwd = 4, col = 'red')
+  hist(b, breaks = breaks, main = paste('Histogram of', cols[2]), xlab = cols[2])
+  abline(v = mean(b), lwd = 4, col = 'red')
+  par(mfrow = c(1, 1))
+}
+
+plot.power.mean <- function(n1 = 100, n2 =100, sig.level =0.05){
+  X <- seq(from = 0.0, to = 0.5, length.out = 100)
+  powers <- sapply(X, function(x) 
+    pwr.t2n.test(n1 = n1, n2 = n2, d = x, sig.level = sig.level, power = NULL,
+               alternative = "two.sided")$power)
+  
+  plot(X, powers, type = 'l', lwd = 2, col = 'red',
+       xlab = 'Mean Diff', ylab = 'Power',
+       main = 'Mean Diff vs. Power')
+}
+
+table(auto.price$aspiration)
+t.test(log.price~aspiration, data = auto.price)
+plot.t(auto.price$log.price[auto.price$aspiration == "std"], 
+       auto.price$log.price[auto.price$aspiration == "turbo"],
+       cols = c("std", "turbo"))
+
+pwr.t2n.test(n1 = length(auto.price$log.price[auto.price$aspiration == "std"]), 
+             n2 = length(auto.price$log.price[auto.price$aspiration == "turbo"]), 
+             d = mean(auto.price$log.price[auto.price$aspiration == "std"]) - mean(auto.price$log.price[auto.price$aspiration == "turbo"]), 
+             sig.level = 0.05, power = NULL,
+             alternative = "two.sided")
+
+plot.power.mean(n1 = length(auto.price$log.price[auto.price$aspiration == "std"]),
+                n2 = length(auto.price$log.price[auto.price$aspiration == "turbo"]))
+
+table(auto.price$fuel.type)
+t.test(log.price~fuel.type, data = auto.price)
+plot.t(auto.price$log.price[auto.price$fuel.type == "diesel"], 
+       auto.price$log.price[auto.price$fuel.type == "gas"],
+       cols = c("diesel", "gas"))
+
+pwr.t2n.test(n1 = length(auto.price$log.price[auto.price$fuel.type == "diesel"]), 
+             n2 = length(auto.price$log.price[auto.price$fuel.type == "gas"]), 
+             d = abs(mean(auto.price$log.price[auto.price$fuel.type == "diesel"]) - mean(auto.price$log.price[auto.price$fuel.type == "gas"])), 
+             sig.level = 0.05, power = NULL,
+             alternative = "two.sided")
+
+plot.power.mean(n1 = length(auto.price$log.price[auto.price$fuel.type == "diesel"]),
+                n2 = length(auto.price$log.price[auto.price$fuel.type == "gas"]))
+
+table(auto.price$drive.wheels)
+t.test(log.price~drive.wheels, data = auto.price[auto.price$drive.wheels != "4wd",])
+plot.t(auto.price$log.price[auto.price$drive.wheels == "fwd"], 
+       auto.price$log.price[auto.price$drive.wheels == "rwd"],
+       cols = c("fwd", "rwd"))
+
+pwr.t2n.test(n1 = length(auto.price$log.price[auto.price$drive.wheels == "fwd"]), 
+             n2 = length(auto.price$log.price[auto.price$drive.wheels == "rwd"]), 
+             d = abs(mean(auto.price$log.price[auto.price$drive.wheels == "fwd"]) - mean(auto.price$log.price[auto.price$drive.wheels == "rwd"])), 
+             sig.level = 0.05, power = NULL,
+             alternative = "two.sided")
+
+plot.power.mean(n1 = length(auto.price$log.price[auto.price$drive.wheels == "fwd"]),
+                n2 = length(auto.price$log.price[auto.price$drive.wheels == "rwd"]))
