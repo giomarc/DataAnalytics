@@ -109,11 +109,11 @@ ks_stat <- function(x_min,x_max, dist_a, dist_b, makeplot = FALSE, labels = c("P
 par(mfrow = c(1, 2))
 
 dist_a <- scale(auto.price$price)
-dist_b <- rnorm(length(auto.price$price), 0, 1)
+dist_b <- rnorm(10000, 0, 1) #length(auto.price$price)
 ks_stat(-3, 3, dist_a, dist_b, makeplot = TRUE, labels = c("Car Price", "Normal"))
 
 dist_a <- scale(auto.price$log.price)
-dist_b <- rnorm(length(auto.price$log.price), 0, 1)
+dist_b <- rnorm(10000, 0, 1) #length(auto.price$log.price)
 ks_stat(-3, 3, dist_a, dist_b, makeplot = TRUE, labels = c("log(Car Price)", "Normal"))
 
 par(mfrow = c(1, 1))
@@ -121,8 +121,8 @@ par(mfrow = c(1, 1))
 ##----Repeat N Times-----
 N <- 1000
 k_s_rep <- sapply(1:N, function(i){
-  dist_a <- scale(auto.price$log.price)
-  dist_b <- rnorm(length(auto.price$log.price), 0, 1)
+  dist_a <- scale(auto.price$price)
+  dist_b <- rnorm(10000, 0, 1) #length(auto.price$price)
   return(ks_stat(-3, 3, dist_a, dist_b))
 })
 
@@ -135,6 +135,7 @@ legend("topright", legend = c("Mean KS"), col = c("red"),lty = 1, cex = 0.8)
 ## KS Tests
 ks.test(scale(auto.price$price), rnorm(length(auto.price$price), 0, 1), alternative = "two.sided")
 ks.test(scale(auto.price$log.price), rnorm(length(auto.price$log.price), 0, 1), alternative = "two.sided")
+
 
 #end of in report
 
