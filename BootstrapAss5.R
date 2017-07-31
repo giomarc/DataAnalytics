@@ -110,6 +110,23 @@ pwr.t2n.test(n1 = length(mean.boot.gas$t),
 g <- boot.comb(a = auto.price, f = auto.price$body.style, n =100)
 
 
+# test code
+i <- length(split.a)
+
+ml <- matrix(0, ncol = i-1, nrow = i-1)
+mcol <- 1
+mrow <- 1
+for(l in 1:ncol(y)){
+  ml[mrow, mcol] <- l
+  if (l != ncol(y)){
+    if(y[1, l] != y[1,l+1]){
+       mcol <- 1
+       mrow <- mrow + 1 }
+    else {
+       mcol <- mcol + 1
+    }
+  }
+}
 
 split.a <- split(auto.price, auto.price$body.style)
 split.a.boot <- data.frame(matrix(ncol = 0, nrow = 100))

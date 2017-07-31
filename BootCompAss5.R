@@ -12,12 +12,22 @@ boot.comb <- function(a = auto.price, f = auto.price$body.style, n = 100){
   }
   
   # set layout
-  # create empty matrix
-  # ma <- matrix(0, 4, 4)
-  # loop through combn row 1, 
+  ml <- matrix(0, ncol = i-1, nrow = i-1)
+  mcol <- 1
+  mrow <- 1
+  for(l in 1:ncol(y)){
+    ml[mrow, mcol] <- l
+    if (l != ncol(y)){
+      if(y[1, l] != y[1,l+1]){
+        mcol <- 1
+        mrow <- mrow + 1 }
+      else {
+        mcol <- mcol + 1
+      }
+    }
+  }
   
-  layout(matrix(c(1,2,3,4,5,6,7,0,8,9,0,0,10,0,0,0), nrow = 4, byrow=T))
-  #layout(matrix(1:ncol(y), nrow = 2, byrow=T))
+  layout(matrix(as.numeric(matrix(ml, nrow = i-1, byrow = T)), nrow = i-1, byrow=T))
   
   for(x in 1:ncol(y)){
     x.1 <- y[1,x]
