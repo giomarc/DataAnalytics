@@ -5,6 +5,7 @@ boot.comb <- function(a = auto.price, f = auto.price$body.style, n = 100){
   y <- combn(i, 2)
   
   df <- data.frame()
+  split.a.boot <- data.frame()
   
   
   for(j in 1:length(split.a)){

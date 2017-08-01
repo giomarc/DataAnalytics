@@ -89,7 +89,7 @@ plot.t(mean.boot.gas$t, mean.boot.diesel$t,
        cols = c("Log Price: Fuel-Gas", "Log Price: Fuel-Diesel"), nbins = 80)
 
 # Bootstrap the mean difference of turbos and standard apsiration
-two.boot.mean.fuel <- two.boot(auto.gas$log.price, auto.diesel$log.price, mean, R = 100000)
+two.boot.mean.fuel <- two.boot(auto.gas$log.price, auto.diesel$log.price, t.test, R = 100000)
 plot.diff(two.boot.mean.fuel$t, cols = 'Mean Difference Log Price ~ fuel type(gas-diesel)')
 
 # Verfiy Normal
@@ -108,6 +108,7 @@ pwr.t2n.test(n1 = length(mean.boot.gas$t),
              alternative = "two.sided")
 
 g <- boot.comb(a = auto.price, f = auto.price$body.style, n =100)
+
 
 
 # test code
