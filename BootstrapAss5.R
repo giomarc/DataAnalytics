@@ -107,9 +107,9 @@ pwr.t2n.test(n1 = length(mean.boot.gas$t),
              sig.level = 0.05, power = NULL,
              alternative = "two.sided")
 
-g <- boot.comb(a = auto.price, f = auto.price$body.style, n =100)
+boot.comb.two(a = auto.price, f = auto.price$body.style, n =100)
 
-
+boot.comb.one(a = auto.price, f = auto.price$body.style, n =100000)
 
 # test code
 i <- length(split.a)
