@@ -69,6 +69,30 @@ plot.ci = function(p, post, nSamps, qs){
       round(ci[1], 2), 'to', round(ci[2], 2))
 }
 
+bayes.pairs <- function(a, b, p, pp,   nSamps = 100000, qs = c(0.025, 0.975)){
+  
+  # sort log prices
+  a <- sort(a, decreasing = FALSE)
+  b <- sort(b, decreasing = FALSE)
+  
+  # calculate liklihood and posterior
+  like.a = comp.like(p, a)
+  post.a = posterior(pp, like.a)
+  
+  like.b = comp.like(p, b)
+  post.b = posterior(pp, like.b)
+  
+  # plot ci 
+  nSamps = 100000
+  qs = c(0.025, 0.975)
+  plot.ci(p, post.a, nSamps, qs)
+  plot.ci(p, post.b, nSamps, qs)
+  
+  plot.post(pp, like.a, post.a, p)
+  plot.post(pp, like.b, post.b, p)
+  
+}
+
 #Setup prior
 
 N = 20000 
@@ -80,6 +104,8 @@ pp = pp / sum(pp)
 require(dplyr)
 auto.turbo <- filter(auto.price, aspiration == "turbo")
 auto.standard <- filter(auto.price, aspiration == "std")
+
+bayes.pairs(auto.turbo$log.price, auto.standard$log.price, p = p, pp = pp)
 
 # sort log prices
 auto.turbo$log.price <- sort(auto.turbo$log.price, decreasing = FALSE)
@@ -100,3 +126,9 @@ plot.ci(p, post.auto.standard, nSamps, qs)
 
 plot.post(pp, like.auto.turbo, post.auto.turbo, p)
 plot.post(pp, like.auto.standard, post.auto.standard, p)
+
+#### Aspiration gas vs diesel
+auto.gas <- filter(auto.price, fuel.type == "gas")
+auto.diesel <- filter(auto.price, fuel.type == "diesel")
+
+bayes.pairs(auto.gas$log.price, auto.diesel$log.price, p =p, pp = pp)
