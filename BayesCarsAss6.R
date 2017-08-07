@@ -170,5 +170,5 @@ bayes.pairs(auto.hatchback$log.price, auto.sedan$log.price, p =p, pp = pp)
 # hatchback - wagon
 bayes.pairs(auto.hatchback$log.price, auto.wagon$log.price, p =p, pp = pp)
 
-# hatchback - sedan
-bayes.pairs(auto.hatchback$log.price, auto.sedan$log.price, p =p, pp = pp)
+# wagon - sedan
+bayes.pairs(auto.wagon$log.price, auto.sedan$log.price, p =p, pp = pp)
