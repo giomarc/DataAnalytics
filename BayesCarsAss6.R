@@ -132,3 +132,42 @@ auto.gas <- filter(auto.price, fuel.type == "gas")
 auto.diesel <- filter(auto.price, fuel.type == "diesel")
 
 bayes.pairs(auto.gas$log.price, auto.diesel$log.price, p =p, pp = pp)
+
+
+#### Body Style 
+
+auto.conv <- filter(auto.price, body.style == "convertible")
+auto.hardtop <- filter(auto.price, body.style == "hardtop")
+auto.hatchback <- filter(auto.price, body.style == "hatchback")
+auto.sedan <- filter(auto.price, body.style == "sedan")
+auto.wagon <- filter(auto.price, body.style == "wagon")
+
+# conv - hardtop
+bayes.pairs(auto.conv$log.price, auto.hardtop$log.price, p =p, pp = pp)
+
+# conv - hatchback
+bayes.pairs(auto.conv$log.price, auto.hatchback$log.price, p =p, pp = pp)
+
+# conv - sedan
+bayes.pairs(auto.conv$log.price, auto.sedan$log.price, p =p, pp = pp)
+
+# conv - wagon
+bayes.pairs(auto.conv$log.price, auto.wagon$log.price, p =p, pp = pp)
+
+# hardtop - hatchback
+bayes.pairs(auto.hardtop$log.price, auto.hatchback$log.price, p =p, pp = pp)
+
+# hardtop - sedan
+bayes.pairs(auto.hardtop$log.price, auto.sedan$log.price, p =p, pp = pp)
+
+# hardtop - wagon
+bayes.pairs(auto.hardtop$log.price, auto.wagon$log.price, p =p, pp = pp)
+
+# hatchback - sedan
+bayes.pairs(auto.hatchback$log.price, auto.sedan$log.price, p =p, pp = pp)
+
+# hatchback - wagon
+bayes.pairs(auto.hatchback$log.price, auto.wagon$log.price, p =p, pp = pp)
+
+# hatchback - sedan
+bayes.pairs(auto.hatchback$log.price, auto.sedan$log.price, p =p, pp = pp)
