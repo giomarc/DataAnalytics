@@ -57,6 +57,76 @@ summary(lm.auto.step)
 plot(lm.auto.step)
 
 
+#### SVD ####
+mod.auto <- model.matrix(price ~. -1, data = auto.price.scaled %>% dplyr::select(-log.price, -price.real))
+head(mod.auto)
+
+svd.auto <- svd(mod.auto)
+svd.auto$d
+
+plot(log(svd.auto$d), main = "Log singular values vs. Index")
+
+cat('The inverse matrix of sigular values')
+dtrim <- rep(0, length(svd.auto$d))
+dtrim[1:56] <- 1/svd.auto$d[1:57]
+dM <- diag(dtrim)
+cat('The pseudo inverse of the matrix')
+InvM <- svd.auto$v %*% dM %*% t(svd.auto$u)
+cat('The pseudo inverse times the matrix')
+invMM <- InvM %*% mod.auto
+
+bM <- InvM %*% auto.price.scaled$price
+
+auto.price.scaled$score <- mod.auto %*% bM + mean(auto.price.scaled$price)
+auto.price.scaled$resids <- auto.price.scaled$score - auto.price.scaled$price
+
+
+require(repr)
+options(repr.pmales.extlot.width=8, repr.plot.height=4)
+
+plot.svd.reg <- function(df, k = 4){
+  require(ggplot2)
+  require(gridExtra)
+  
+  p1 <- ggplot(df) + 
+    geom_point(aes(score, resids), size = 2) + 
+    stat_smooth(aes(score, resids)) +
+    ggtitle('Residuals vs. fitted values')
+  
+  p2 <- ggplot(df, aes(resids)) +
+    geom_histogram(aes(y = ..density..)) +
+    geom_density(color = 'red', fill = 'red', alpha = 0.2) +
+    ggtitle('Histogram of residuals')
+  
+  qqnorm(df$resids)
+  
+  grid.arrange(p1, p2, ncol = 2)
+  
+  df$std.resids = sqrt((df$resids - mean(df$resids))^2)  
+  
+  p3 = ggplot(df) + 
+    geom_point(aes(score, std.resids), size = 2) + 
+    stat_smooth(aes(score, std.resids)) +
+    ggtitle('Standardized residuals vs. fitted values')
+  print(p3) 
+  
+  n = nrow(df)
+  Ybar = mean(df$price)
+  SST <- sum((df$price - Ybar)^2)
+  SSR <- sum(df$resids * df$resids)
+  SSE = SST - SSR
+  cat(paste('SSE =', as.character(SSE), '\n'))
+  cat(paste('SSR =', as.character(SSR), '\n'))
+  cat(paste('SST =', as.character(SSE + SSR), '\n'))
+  cat(paste('RMSE =', as.character(SSE/(n - 2)), '\n'))
+  
+  adjR2  <- 1.0 - (SSR/SST) * ((n - 1)/(n - k - 1))
+  cat(paste('Adjusted R^2 =', as.character(adjR2)), '\n')
+}
+
+plot.svd.reg(auto.price.scaled, k = 60)
+
+
 #### For reference
 
 require(HistData)
