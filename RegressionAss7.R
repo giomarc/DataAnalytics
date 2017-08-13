@@ -42,7 +42,7 @@ lm.auto.step$anova
 summary(lm.auto.step)
 plot(lm.auto.step)
 
-# try with price un.scaled
+# try with price un.scaled, keep
 
 auto.price.scaled$price.real <- auto.price$price
 auto.price.scaled$log.price <- log(auto.price$price)
@@ -68,7 +68,7 @@ plot(log(svd.auto$d), main = "Log singular values vs. Index")
 
 cat('The inverse matrix of sigular values')
 dtrim <- rep(0, length(svd.auto$d))
-dtrim[1:56] <- 1/svd.auto$d[1:57]
+dtrim[1:57] <- 1/svd.auto$d[1:57]
 dM <- diag(dtrim)
 cat('The pseudo inverse of the matrix')
 InvM <- svd.auto$v %*% dM %*% t(svd.auto$u)
@@ -80,6 +80,8 @@ bM <- InvM %*% auto.price.scaled$price
 auto.price.scaled$score <- mod.auto %*% bM + mean(auto.price.scaled$price)
 auto.price.scaled$resids <- auto.price.scaled$score - auto.price.scaled$price
 
+auto.price.scaled$score.rescale <- auto.price.scaled$score*sd(auto.price.scaled$price.real) + mean(auto.price.scaled$price.real)
+auto.price.scaled$resids.rescale <- auto.price.scaled$score.rescale - auto.price.scaled$price.real
 
 require(repr)
 options(repr.pmales.extlot.width=8, repr.plot.height=4)
@@ -125,6 +127,52 @@ plot.svd.reg <- function(df, k = 4){
 }
 
 plot.svd.reg(auto.price.scaled, k = 60)
+
+
+#test plotting rescale
+plot.svd.reg.rescale <- function(df, k = 4){
+  require(ggplot2)
+  require(gridExtra)
+  
+  p1 <- ggplot(df) + 
+    geom_point(aes(score.rescale, resids.rescale), size = 2) + 
+    stat_smooth(aes(score.rescale, resids.rescale)) +
+    ggtitle('Residuals vs. fitted values')
+  
+  p2 <- ggplot(df, aes(resids.rescale)) +
+    geom_histogram(aes(y = ..density..)) +
+    geom_density(color = 'red', fill = 'red', alpha = 0.2) +
+    ggtitle('Histogram of residuals')
+  
+  qqnorm(df$resids.rescale)
+  
+  grid.arrange(p1, p2, ncol = 2)
+  
+  df$std.resids = sqrt((df$resids.rescale - mean(df$resids.rescale))^2)  
+  
+  p3 = ggplot(df) + 
+    geom_point(aes(score.rescale, std.resids), size = 2) + 
+    stat_smooth(aes(score.rescale, std.resids)) +
+    ggtitle('Standardized residuals vs. fitted values')
+  print(p3) 
+  
+  n = nrow(df)
+  Ybar = mean(df$price.real)
+  SST <- sum((df$price.real - Ybar)^2)
+  SSR <- sum(df$resids.rescale * df$resids.rescale)
+  SSE = SST - SSR
+  cat(paste('SSE =', as.character(SSE), '\n'))
+  cat(paste('SSR =', as.character(SSR), '\n'))
+  cat(paste('SST =', as.character(SSE + SSR), '\n'))
+  cat(paste('RMSE =', as.character(SSE/(n - 2)), '\n'))
+  
+  adjR2  <- 1.0 - (SSR/SST) * ((n - 1)/(n - k - 1))
+  cat(paste('Adjusted R^2 =', as.character(adjR2)), '\n')
+}
+
+plot.svd.reg.rescale(auto.price.scaled, k = 60)
+
+
 
 
 #### For reference
