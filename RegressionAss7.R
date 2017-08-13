@@ -77,11 +77,21 @@ invMM <- InvM %*% mod.auto
 
 bM <- InvM %*% auto.price.scaled$price
 
+# Note to self: 
+# change this to a separate results df adding in scaled price for compatibility with plot.svd.reg
+
+auto.results.svd <- data.frame(actual = auto.price.scaled$price)
+auto.results.svd$score <- mod.auto %*% bM + mean(auto.price.scaled$price)
+auto.results.svd$resids <- auto.results.svd$score - auto.results.svd$actual
+
+## remove
 auto.price.scaled$score <- mod.auto %*% bM + mean(auto.price.scaled$price)
 auto.price.scaled$resids <- auto.price.scaled$score - auto.price.scaled$price
 
 auto.price.scaled$score.rescale <- auto.price.scaled$score*sd(auto.price.scaled$price.real) + mean(auto.price.scaled$price.real)
 auto.price.scaled$resids.rescale <- auto.price.scaled$score.rescale - auto.price.scaled$price.real
+#remove
+
 
 require(repr)
 options(repr.pmales.extlot.width=8, repr.plot.height=4)
@@ -113,8 +123,8 @@ plot.svd.reg <- function(df, k = 4){
   print(p3) 
   
   n = nrow(df)
-  Ybar = mean(df$price)
-  SST <- sum((df$price - Ybar)^2)
+  Ybar = mean(df$actual)
+  SST <- sum((df$actual - Ybar)^2)
   SSR <- sum(df$resids * df$resids)
   SSE = SST - SSR
   cat(paste('SSE =', as.character(SSE), '\n'))
@@ -126,7 +136,7 @@ plot.svd.reg <- function(df, k = 4){
   cat(paste('Adjusted R^2 =', as.character(adjR2)), '\n')
 }
 
-plot.svd.reg(auto.price.scaled, k = 60)
+plot.svd.reg(auto.results.svd, k = 60)
 
 
 #test plotting rescale
@@ -173,10 +183,22 @@ plot.svd.reg.rescale <- function(df, k = 4){
 plot.svd.reg.rescale(auto.price.scaled, k = 60)
 
 
+#### Elastic Net #####
+require(glmnet)
 
+b <- auto.price.scaled$log.price
 
-#### For reference
+auto.ridge.lasso <- glmnet(mod.auto, b, family = 'gaussian', nlambda = 20, alpha = 0.5)
+plot(auto.ridge.lasso, xvar = 'lambda', label = TRUE)
+plot(auto.ridge.lasso, xvar = 'dev', label = TRUE)
 
+auto.results.eln  <- data.frame(actual = b)
+auto.results.eln$score <- predict(auto.ridge.lasso, newx = mod.auto)[,14]
+auto.results.eln$resids <- auto.results.eln$score - auto.results.eln$actual
+
+plot.svd.reg(auto.results.eln, k = auto.ridge.lasso$df[14])
+
+#### Reference ####
 require(HistData)
 require(dplyr)
 Galton.scaled = GaltonFamilies[, c('mother', 'father', 'childHeight', 'gender')]
