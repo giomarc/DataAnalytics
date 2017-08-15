@@ -17,6 +17,10 @@ plot(IceCream.ts)
 plot(log(IceCream.ts))
 par(mfrow = c(1,1))
 
+
+require(tseries)
+adf.test(IceCream.ts, alternative = "stationary")
+
 dist.ts = function(df, col = 'residual', bins = 40){
   par(mfrow = c(1,2))
   temp = as.vector(df)
