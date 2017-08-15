@@ -11,7 +11,11 @@ head(IceCream)
 IceCream.ts <- ts(IceCream[,3], start = IceCream[1,1], frequency = 12)
 
 head(IceCream.ts)
+
+par(mfrow = c(1,2))
 plot(IceCream.ts)
+plot(log(IceCream.ts))
+par(mfrow = c(1,1))
 
 dist.ts = function(df, col = 'residual', bins = 40){
   par(mfrow = c(1,2))
@@ -25,7 +29,8 @@ dist.ts = function(df, col = 'residual', bins = 40){
 dist.ts(IceCream.ts, col = "Icecream.Prod")
 
 
-options(repr.pmales.extlot.width=8, repr.plot.height=6)
+
+options(repr.pmales.extlot.width=8, repr.plot.height=8)
 plot.acf <- function(df, col = 'remainder', is.df =TRUE){
   if(is.df) temp <- df[, col]
   else temp <- df
@@ -49,4 +54,17 @@ ts.decomp <- function(df, col = 'elec.ts', span = 0.5, Mult = TRUE, is.df = TRUE
 
 IceCream.decomp <- ts.decomp(IceCream.ts, is.df = FALSE, Mult = FALSE)
 
+plot.acf(IceCream.decomp[,3], col = "remainder", is.df = FALSE)
 
+require(forecast)
+IceCream.ARIMA <- auto.arima(IceCream.ts, max.p=4, max.q=4,
+                             max.P=2, max.Q=2, max.order=5, max.d=2, max.D=1,
+                             start.p=0, start.q=0, start.P=0, start.Q=0)
+summary(IceCream.ARIMA)
+
+plot.acf(IceCream.ARIMA$residuals, col = "residuals", is.df = FALSE)
+
+IceCream.forecast <- forecast(IceCream.ARIMA, h = 12)
+summary(IceCream.forecast)
+
+plot(IceCream.forecast)
