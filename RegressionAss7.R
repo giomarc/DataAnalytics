@@ -68,7 +68,7 @@ plot(log(svd.auto$d), main = "Log singular values vs. Index")
 
 cat('The inverse matrix of sigular values')
 dtrim <- rep(0, length(svd.auto$d))
-dtrim[1:57] <- 1/svd.auto$d[1:57]
+dtrim[1:30] <- 1/svd.auto$d[1:30]
 dM <- diag(dtrim)
 cat('The pseudo inverse of the matrix')
 InvM <- svd.auto$v %*% dM %*% t(svd.auto$u)
