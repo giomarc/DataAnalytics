@@ -72,3 +72,8 @@ IceCream.forecast <- forecast(IceCream.ARIMA, h = 12)
 summary(IceCream.forecast)
 
 plot(IceCream.forecast)
+
+IceCream.forecast <- forecast(IceCream.ARIMA, h = 36)
+range.95 <- IceCream.forecast$upper[,2]-IceCream.forecast$lower[,2]
+plot(range.95)
+rep(dairy$Month[1:12], 3)
