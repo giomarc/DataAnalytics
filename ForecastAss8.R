@@ -60,6 +60,18 @@ IceCream.decomp <- ts.decomp(IceCream.ts, is.df = FALSE, Mult = FALSE)
 
 plot.acf(IceCream.decomp[,3], col = "remainder", is.df = FALSE)
 
+ts.model = function(ts, col = 'remainder', order = c(0,0,1)){
+  mod = arima(ts, order = order, include.mean = FALSE)
+  print(mod)
+  mod
+}
+
+mod.est = ts.model(IceCream.decomp[,3], col = 'ARMA', order = c(4,0,1))
+mod.est <- auto.arima(IceCream.decomp[,3], max.d = 0, seasonal = FALSE)
+summary(mod.est)
+plot.acf(mod.est$resid[-1], col = 'ARMA', is.df = F)
+
+
 require(forecast)
 IceCream.ARIMA <- auto.arima(IceCream.ts, max.p=4, max.q=4,
                              max.P=2, max.Q=2, max.order=5, max.d=2, max.D=1,
@@ -77,3 +89,5 @@ IceCream.forecast <- forecast(IceCream.ARIMA, h = 36)
 range.95 <- IceCream.forecast$upper[,2]-IceCream.forecast$lower[,2]
 plot(range.95)
 rep(dairy$Month[1:12], 3)
+
+range.95 <- ts(range.95)
