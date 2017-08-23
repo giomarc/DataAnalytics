@@ -179,6 +179,8 @@ require(corrplot)
 cors = cor(players.sub[, sapply(players.sub, is.numeric)], method = 'pearson')
 corrplot.mixed(cors, upper = "ellipse", tl.cex = 0.8)
 
+
+# add cor.mtest for p.value matrix.... look in help
 cex.before <- par("cex")
 par(cex = 0.7)
 corrplot(cors, method = "color",
