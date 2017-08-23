@@ -137,19 +137,33 @@ ggplot(sample_frac(players.sub, 0.05), aes(x = SESHTIME, y= TOTALSINKS, fill = P
 ggplot(sample_frac(players.sub, 0.05), aes(x = SESHTIME, y = TOTALSINKS)) +
   geom_raster(aes(fill = PURCHASES_30), interpolate = TRUE)
 
-
+# density plots
 colfunc <- colorRampPalette(c("white", "lightblue", "green", "yellow", "red"))
-ggplot(dplyr::filter(players.sub, purchaser_30 == TRUE), aes(x = SESHTIME, y = TOTALSINKS)) +
+p1 <- ggplot(dplyr::filter(players.sub, purchaser_30 == TRUE), aes(x = SESHTIME, y = TOTALSINKS)) +
   ylim(0, 500) + xlim(0,30000) +
   stat_density2d(geom="tile", aes(fill = ..density..), contour = FALSE) +
   scale_fill_gradientn(colours=colfunc(400)) + 
   geom_density2d(colour="black", bins=5)
 
-ggplot(dplyr::filter(players.sub, purchaser_30 == FALSE), aes(x = SESHTIME, y = TOTALSINKS)) +
+p2 <- ggplot(dplyr::filter(players.sub, purchaser_30 == FALSE), aes(x = SESHTIME, y = TOTALSINKS)) +
   ylim(0, 500) + xlim(0,30000) +
   stat_density2d(geom="tile", aes(fill = ..density..), contour = FALSE) +
   scale_fill_gradientn(colours=colfunc(400)) + 
   geom_density2d(colour="black", bins=5)
+# density plots with 5x zoom
+p3 <- ggplot(dplyr::filter(players.sub, purchaser_30 == TRUE), aes(x = SESHTIME, y = TOTALSINKS)) +
+  ylim(0, 500/5) + xlim(0,30000/5) +
+  stat_density2d(geom="tile", aes(fill = ..density..), contour = FALSE) +
+  scale_fill_gradientn(colours=colfunc(400)) + 
+  geom_density2d(colour="black", bins=5)
+
+p4 <- ggplot(dplyr::filter(players.sub, purchaser_30 == FALSE), aes(x = SESHTIME, y = TOTALSINKS)) +
+  ylim(0, 500/5) + xlim(0,30000/5) +
+  stat_density2d(geom="tile", aes(fill = ..density..), contour = FALSE) +
+  scale_fill_gradientn(colours=colfunc(400)) + 
+  geom_density2d(colour="black", bins=5)
+
+grid.arrange(p1, p2, p3, p4, ncol = 2, nrow = 2)
 
 ggplot(dplyr::filter(players.sub, purchaser_30 == TRUE), aes(x = SESHTIME, y = TOTALSINKS)) +
   geom_point(aes(color = PURCHASES_30), alpha = 0.3) +
