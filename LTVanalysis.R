@@ -120,7 +120,9 @@ plot.dists(a$LASTCOURSE, b$LASTCOURSE, cols = c('Last Course Reached Day 3 Monet
 plot.dists.cut(a$LASTCOURSE, b$LASTCOURSE, cols = c('Last Course Reached Day 3 Monetizer', 'Last Course Reached Day 3 Non-Monetizer'), nbins = 838)
 
 
-players.sub <- players %>% dplyr::filter((SESSIONS > 1 & SESHTIME >0) | purchaser_30 == TRUE)
+players.sub <- players %>% dplyr::filter((SESSIONS > 1 & SESHTIME > 0) | purchaser_30 == TRUE)
+
+players.sub <- players %>% dplyr::filter(LASTCOURSE >= 1)
 summary(players.sub)
 
 ggplot(sample_frac(players.sub, 0.10), aes(SESHTIME, TOTALSINKS)) + 
@@ -141,30 +143,30 @@ ggplot(sample_frac(players.sub, 0.05), aes(x = SESHTIME, y = TOTALSINKS)) +
 # density plots
 colfunc <- colorRampPalette(c("white", "lightblue", "green", "yellow", "red"))
 p1 <- ggplot(dplyr::filter(players.sub, purchaser_30 == TRUE), aes(x = SESHTIME, y = TOTALSINKS)) +
-  ylim(0, 500) + xlim(0,30000) +
+  ylim(0, 300) + xlim(0,30000) +
   stat_density2d(geom="tile", aes(fill = ..density..), contour = FALSE) +
   scale_fill_gradientn(colours=colfunc(400)) + 
   geom_density2d(colour="black", bins=5)
 
 p2 <- ggplot(dplyr::filter(players.sub, purchaser_30 == FALSE), aes(x = SESHTIME, y = TOTALSINKS)) +
-  ylim(0, 500) + xlim(0,30000) +
+  ylim(0, 300) + xlim(0,30000) +
   stat_density2d(geom="tile", aes(fill = ..density..), contour = FALSE) +
   scale_fill_gradientn(colours=colfunc(400)) + 
   geom_density2d(colour="black", bins=5)
 # density plots with 5x zoom
 p3 <- ggplot(dplyr::filter(players.sub, purchaser_30 == TRUE), aes(x = SESHTIME, y = TOTALSINKS)) +
-  ylim(0, 500/5) + xlim(0,30000/5) +
+  ylim(0, 300/5) + xlim(0,30000/5) +
   stat_density2d(geom="tile", aes(fill = ..density..), contour = FALSE) +
   scale_fill_gradientn(colours=colfunc(400)) + 
   geom_density2d(colour="black", bins=5)
 
 p4 <- ggplot(dplyr::filter(players.sub, purchaser_30 == FALSE), aes(x = SESHTIME, y = TOTALSINKS)) +
-  ylim(0, 500/5) + xlim(0,30000/5) +
+  ylim(0, 300/5) + xlim(0,30000/5) +
   stat_density2d(geom="tile", aes(fill = ..density..), contour = FALSE) +
   scale_fill_gradientn(colours=colfunc(400)) + 
   geom_density2d(colour="black", bins=5)
 
-grid.arrange(p1, p3, p2, p4, ncol = 2, nrow = 2)
+grid.arrange(p3, p4, nrow = 2)
 
 ggplot(dplyr::filter(players.sub, purchaser_30 == TRUE), aes(x = SESHTIME, y = TOTALSINKS)) +
   geom_point(aes(color = PURCHASES_30), alpha = 0.3) +
@@ -187,8 +189,10 @@ cors <- cor(cbind(players.sub[, sapply(players.sub, is.numeric)], as.integer(pla
             method = 'pearson')
 #end scratch
 
-cors <- cor(players.sub[, sapply(players.sub, is.numeric)], method = 'pearson')
+cors <- cor(players.sub.lastcourse[, sapply(players.sub.lastcourse, is.numeric)], method = 'pearson')
 corrplot.mixed(cors, upper = "ellipse", tl.cex = 0.8)
+
+source('H:/R/DataAnalytics/cormtest.R', echo=TRUE)
 corm <- cor.mtest.2(cors)
 
 
@@ -210,16 +214,58 @@ ggplot(players.sub, aes(x = factor(purchaser_30), y = SESHTIME)) +
 
 # violin plots - session time, sessions, 
 ggplot(players.sub, aes(x = factor(purchaser_30), y = TOTALSINKS)) + 
-  geom_violin()  + 
+  geom_violin(trim = TRUE, draw_quantiles = c(0.5, 0.75))  + 
+  stat_summary(fun.y = "mean", geom = "point", colour = "red") +
+  xlab('Monetizer')  + ylab('Sinks Time') + 
+  ggtitle('Sinks and 30 day Monetizer')
+
+# Last 
+ggplot(players.sub, aes(x = factor(purchaser_30), y = TOTALSINKS)) + 
+  geom_violin(trim = TRUE, draw_quantiles = c(0.5, 0.75))  + 
   stat_summary(fun.y = "mean", geom = "point", colour = "red") +
   xlab('Monetizer')  + ylab('Sinks Time') + 
   ggtitle('Sinks and 30 day Monetizer')
 
 # violin plots - session time, sessions, 
-ggplot(players.sub, aes(x = factor(purchaser_30), y = ATTEMPTS)) + 
-  geom_violin(trim = TRUE, draw_quantiles = c(0.25, 0.5, 0.75)) +
-  stat_summary(fun.y = "mean", geom = "point", colour = "green") +
-  xlab('Monetizer')  + ylab('Session Time (s)') + scale
-  ggtitle('Sinks and 30 day Monetizer')
-  
+ggplot(players.sub, aes(x = factor(purchaser_30), y = COMPLETES)) + 
+  geom_violin(trim = TRUE, draw_quantiles = c(0.75)) +
+  stat_summary(fun.y = "mean", geom = "point", colour = "red") +
+  xlab('Monetizer')  + ylab('Completes') +
+  ggtitle('Completes and 30 day Monetizer')
+
+##### prepare for linear regressions #####
+
+
+# scale data
+nums <- sapply(players.sub, is.numeric)
+players.sub.scale <- players.sub
+players.sub.scale[, nums] <- lapply(players.sub[, nums], scale)
+
+
+# remove columns not in model
+
+players.sub.scale.model <- players.sub.scale %>% select(-INSTALLDATE, -PUBLISHER, -COUNTRY, 
+                                                        -PLATFORM, -BOOKINGS_30, -purchaser_3, 
+                                                        -purchaser_30)
+str(players.sub.scale.model)
+
+# split data into a training set and testing set
+set.seed(369)
+row.samp <- sample(1:nrow(players.sub.scale.model), 0.7*nrow(players.sub.scale.model)) # should evaluate sample weight
+players.train <- players.sub.scale.model[row.samp,]
+players.test <- players.sub.scale.model[-row.samp,]
+
+#### regression ####
+
+# kitchen sync
+players.base.lm <- lm(PURCHASES_30 ~ ., data = players.train)
+summary(players.base.lm)
+plot(players.base.lm)
+AIC(players.base.lm)
+BIC(players.base.lm)
+
+# Step wise 
+require(MASS)
+players.step.lm <- stepAIC(players.base.lm, direction = "both")
+players.step.lm$anova
   
