@@ -30,14 +30,28 @@ players <- players %>% mutate(purchaser_3 = PURCHASES_3 > 0)
 players <- players %>% mutate(fails = (ATTEMPTS + RETRYS) - COMPLETES)
 players <- players %>% mutate(success.rate = ifelse(ATTEMPTS > 0, COMPLETES/(ATTEMPTS), 0))
 
+#statistics from fbasics
+require(fBasics)
+
+basicStats(players[, sapply(players, is.numeric)])[c("nobs", 
+                                                     "Minimum", 
+                                                     "1. Quartile", 
+                                                     "Median", 
+                                                     "Mean", 
+                                                     "Median", 
+                                                     "3. Quartile",
+                                                     "Maximum",
+                                                     "Stdev",
+                                                     "Skewness"),]
+
 #understand payer summary vs non-payers
 
-summary(filter(players, purchaser_30 == TRUE))
-summary(filter(players, purchaser_30 == FALSE))
-summary(filter(players, SESSIONS == 1))
+summary(dplyr::filter(players, purchaser_30 == TRUE))
+summary(dplyr::filter(players, purchaser_30 == FALSE))
+summary(dplyr::filter(players, SESSIONS == 1))
 
 
-players %>% filter(SESSIONS == 1)  %>% count(PURCHASES_30)
+players %>% dplyr::filter(SESSIONS == 1)  %>% count(PURCHASES_30)
 
 # bar plots of purchasers/purchases
 
@@ -75,20 +89,20 @@ ggplot(players, aes(SESSIONS)) +
 
 # plot session time for 30 day purchasers
 
-a <- players %>% filter(purchaser_30 == TRUE) %>% select(SESHTIME)  
-b <- players %>% filter(purchaser_30 == FALSE) %>% select(SESHTIME) 
+a <- players %>% dplyr::filter(purchaser_30 == TRUE) %>% select(SESHTIME)  
+b <- players %>% dplyr::filter(purchaser_30 == FALSE) %>% select(SESHTIME) 
 plot.t(a$SESHTIME, b$SESHTIME, cols = c('First 3 days Session Time (sec.) Monetizer', 'First 3 days Session Time (sec.) Non-Monetizer'))
 
 # plot session time for 30 day purchasers
 
-a <- players %>% filter(purchaser_30 == TRUE & SESHTIME > 0) %>% select(SESHTIME)  
-b <- players %>% filter(purchaser_30 == FALSE & SESHTIME > 0) %>% select(SESHTIME) 
+a <- players %>% dplyr::filter(purchaser_30 == TRUE & SESHTIME > 0) %>% select(SESHTIME)  
+b <- players %>% dplyr::filter(purchaser_30 == FALSE & SESHTIME > 0) %>% select(SESHTIME) 
 plot.t(a$SESHTIME, b$SESHTIME, cols = c('First 3 days Session Time (sec.) Monetizer', 'First 3 days Session Time (sec.) Non-Monetizer'))
 
 # plot sinks time for 30 day purchasers
 
-a <- players %>% filter(purchaser_30 == TRUE & SESHTIME > 0) %>% select(TOTALSINKS)  
-b <- players %>% filter(purchaser_30 == FALSE & SESHTIME > 0) %>% select(TOTALSINKS) 
+a <- players %>% dplyr::filter(purchaser_30 == TRUE & SESHTIME > 0) %>% select(TOTALSINKS)  
+b <- players %>% dplyr::filter(purchaser_30 == FALSE & SESHTIME > 0) %>% select(TOTALSINKS) 
 plot.t(a$TOTALSINKS, b$TOTALSINKS, cols = c('First 3 days Sinks Monetizer', 'First 3 days Sinks Non-Monetizer'))
 
 plot.dists.cut(a$TOTALSINKS, b$TOTALSINKS, 
@@ -97,15 +111,15 @@ plot.dists.cut(a$TOTALSINKS, b$TOTALSINKS,
 
 # plot last course time for 30 day purchasers
 
-a <- players %>% filter(purchaser_30 == TRUE & SESHTIME > 0) %>% select(LASTCOURSE)  
-b <- players %>% filter(purchaser_30 == FALSE & SESHTIME > 0) %>% select(LASTCOURSE) 
+a <- players %>% dplyr::filter(purchaser_30 == TRUE & SESHTIME > 0) %>% select(LASTCOURSE)  
+b <- players %>% dplyr::filter(purchaser_30 == FALSE & SESHTIME > 0) %>% select(LASTCOURSE) 
 plot.dists(a$LASTCOURSE, b$LASTCOURSE, cols = c('Last Course Reached Day 3 Monetizer', 'Last Course Reached Day 3 Non-Monetizer'), nbins = 500)
 
 
 plot.dists.cut(a$LASTCOURSE, b$LASTCOURSE, cols = c('Last Course Reached Day 3 Monetizer', 'Last Course Reached Day 3 Non-Monetizer'), nbins = 838)
 
 
-players.sub <- players %>% filter((SESSIONS > 1 & SESHTIME >0) | purchaser_30 == TRUE)
+players.sub <- players %>% dplyr::filter((SESSIONS > 1 & SESHTIME >0) | purchaser_30 == TRUE)
 summary(players.sub)
 
 ggplot(sample_frac(players.sub, 0.10), aes(SESHTIME, TOTALSINKS)) + 
@@ -125,22 +139,22 @@ ggplot(sample_frac(players.sub, 0.05), aes(x = SESHTIME, y = TOTALSINKS)) +
 
 
 colfunc <- colorRampPalette(c("white", "lightblue", "green", "yellow", "red"))
-ggplot(filter(players.sub, purchaser_30 == TRUE), aes(x = SESHTIME, y = TOTALSINKS)) +
+ggplot(dplyr::filter(players.sub, purchaser_30 == TRUE), aes(x = SESHTIME, y = TOTALSINKS)) +
   ylim(0, 500) + xlim(0,30000) +
   stat_density2d(geom="tile", aes(fill = ..density..), contour = FALSE) +
   scale_fill_gradientn(colours=colfunc(400)) + 
   geom_density2d(colour="black", bins=5)
 
-ggplot(filter(players.sub, purchaser_30 == FALSE), aes(x = SESHTIME, y = TOTALSINKS)) +
+ggplot(dplyr::filter(players.sub, purchaser_30 == FALSE), aes(x = SESHTIME, y = TOTALSINKS)) +
   ylim(0, 500) + xlim(0,30000) +
   stat_density2d(geom="tile", aes(fill = ..density..), contour = FALSE) +
   scale_fill_gradientn(colours=colfunc(400)) + 
   geom_density2d(colour="black", bins=5)
 
-ggplot(filter(players.sub, purchaser_30 == TRUE), aes(x = SESHTIME, y = TOTALSINKS)) +
+ggplot(dplyr::filter(players.sub, purchaser_30 == TRUE), aes(x = SESHTIME, y = TOTALSINKS)) +
   geom_point(aes(color = PURCHASES_30), alpha = 0.3) +
   geom_density2d(colour="white", bins=5)
 
-ggplot(filter(players.sub, purchaser_30 == FALSE), aes(x = SESHTIME, y = TOTALSINKS)) +
+ggplot(dplyr::filter(players.sub, purchaser_30 == FALSE), aes(x = SESHTIME, y = TOTALSINKS)) +
   geom_point(alpha = 0.3) +
   geom_density2d(colour="white", bins=5)
