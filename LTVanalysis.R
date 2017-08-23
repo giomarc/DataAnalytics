@@ -172,3 +172,17 @@ ggplot(dplyr::filter(players.sub, purchaser_30 == TRUE), aes(x = SESHTIME, y = T
 ggplot(dplyr::filter(players.sub, purchaser_30 == FALSE), aes(x = SESHTIME, y = TOTALSINKS)) +
   geom_point(alpha = 0.3) +
   geom_density2d(colour="white", bins=5)
+
+# correlation plot
+
+require(corrplot)
+cors = cor(players.sub[, sapply(players.sub, is.numeric)], method = 'pearson')
+corrplot.mixed(cors, upper = "ellipse", tl.cex = 0.8)
+
+cex.before <- par("cex")
+par(cex = 0.7)
+corrplot(cors, method = "color",
+         addCoef.col="grey", 
+         order = "AOE", tl.cex = 0.8,
+         cl.cex = 1/par("cex"), addCoefasPercent = FALSE)
+par(cex = cex.before)
