@@ -87,6 +87,7 @@ ggplot(players, aes(SESSIONS)) +
   xlim(NA, 100) +
   ggtitle('Session Time first 3 days')
 
+
 # plot session time for 30 day purchasers
 
 a <- players %>% dplyr::filter(purchaser_30 == TRUE) %>% select(SESHTIME)  
@@ -163,7 +164,7 @@ p4 <- ggplot(dplyr::filter(players.sub, purchaser_30 == FALSE), aes(x = SESHTIME
   scale_fill_gradientn(colours=colfunc(400)) + 
   geom_density2d(colour="black", bins=5)
 
-grid.arrange(p1, p2, p3, p4, ncol = 2, nrow = 2)
+grid.arrange(p1, p3, p2, p4, ncol = 2, nrow = 2)
 
 ggplot(dplyr::filter(players.sub, purchaser_30 == TRUE), aes(x = SESHTIME, y = TOTALSINKS)) +
   geom_point(aes(color = PURCHASES_30), alpha = 0.3) +
@@ -176,15 +177,49 @@ ggplot(dplyr::filter(players.sub, purchaser_30 == FALSE), aes(x = SESHTIME, y = 
 # correlation plot
 
 require(corrplot)
-cors = cor(players.sub[, sapply(players.sub, is.numeric)], method = 'pearson')
+
+#scratch
+players.sub.payers <- players.sub %>% dplyr::filter(purchaser_30 == TRUE)
+players.sub.payers$payer.30.int <- as.integer(players.sub.payers$purchaser_30)
+cors <- cor(players.sub.payers[, sapply(players.sub.payers, is.numeric)], method = 'pearson')
+
+cors <- cor(cbind(players.sub[, sapply(players.sub, is.numeric)], as.integer(players.sub$purchaser_30)), 
+            method = 'pearson')
+#end scratch
+
+cors <- cor(players.sub[, sapply(players.sub, is.numeric)], method = 'pearson')
 corrplot.mixed(cors, upper = "ellipse", tl.cex = 0.8)
+corm <- cor.mtest.2(cors)
 
 
 # add cor.mtest for p.value matrix.... look in help
 cex.before <- par("cex")
 par(cex = 0.7)
-corrplot(cors, method = "color",
+corrplot(cors,  p.mat = corm[[1]], insig = "blank", method = "color",
          addCoef.col="grey", 
          order = "AOE", tl.cex = 0.8,
          cl.cex = 1/par("cex"), addCoefasPercent = FALSE)
 par(cex = cex.before)
+
+# violin plots - session time, sessions, 
+ggplot(players.sub, aes(x = factor(purchaser_30), y = SESHTIME)) + 
+  geom_violin(trim = TRUE, draw_quantiles = c(0.25, 0.5, 0.75)) +
+  stat_summary(fun.y = "mean", geom = "point", colour = "red") +
+  xlab('Monetizer')  + ylab('Session Time (s)') +
+  ggtitle('Session time and 30 day Monetizer')
+
+# violin plots - session time, sessions, 
+ggplot(players.sub, aes(x = factor(purchaser_30), y = TOTALSINKS)) + 
+  geom_violin()  + 
+  stat_summary(fun.y = "mean", geom = "point", colour = "red") +
+  xlab('Monetizer')  + ylab('Sinks Time') + 
+  ggtitle('Sinks and 30 day Monetizer')
+
+# violin plots - session time, sessions, 
+ggplot(players.sub, aes(x = factor(purchaser_30), y = ATTEMPTS)) + 
+  geom_violin(trim = TRUE, draw_quantiles = c(0.25, 0.5, 0.75)) +
+  stat_summary(fun.y = "mean", geom = "point", colour = "green") +
+  xlab('Monetizer')  + ylab('Session Time (s)') + scale
+  ggtitle('Sinks and 30 day Monetizer')
+  
+  
