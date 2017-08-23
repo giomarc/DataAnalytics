@@ -112,3 +112,35 @@ ggplot(sample_frac(players.sub, 0.10), aes(SESHTIME, TOTALSINKS)) +
   geom_point(aes(color = factor(purchaser_30), size = BOOKINGS_30), alpha = 0.3) + 
   xlab('Session Time (sec.)') + ylab('Total Sinks') + 
   ggtitle('Engagement vs. Sinking')
+
+
+ggplot(sample_frac(players.sub, 0.05), aes(x = SESHTIME, y= TOTALSINKS, fill = PURCHASES_30)) + 
+  stat_binhex(aes(alpha = ..count..)) + 
+  scale_alpha(name = 'Frequency', range = c(0,1)) + 
+  xlab('Session Time (sec.)') + ylab('Total Sinks') + 
+  ggtitle('Engagement vs. Sinking')
+
+ggplot(sample_frac(players.sub, 0.05), aes(x = SESHTIME, y = TOTALSINKS)) +
+  geom_raster(aes(fill = PURCHASES_30), interpolate = TRUE)
+
+
+colfunc <- colorRampPalette(c("white", "lightblue", "green", "yellow", "red"))
+ggplot(filter(players.sub, purchaser_30 == TRUE), aes(x = SESHTIME, y = TOTALSINKS)) +
+  ylim(0, 500) + xlim(0,30000) +
+  stat_density2d(geom="tile", aes(fill = ..density..), contour = FALSE) +
+  scale_fill_gradientn(colours=colfunc(400)) + 
+  geom_density2d(colour="black", bins=5)
+
+ggplot(filter(players.sub, purchaser_30 == FALSE), aes(x = SESHTIME, y = TOTALSINKS)) +
+  ylim(0, 500) + xlim(0,30000) +
+  stat_density2d(geom="tile", aes(fill = ..density..), contour = FALSE) +
+  scale_fill_gradientn(colours=colfunc(400)) + 
+  geom_density2d(colour="black", bins=5)
+
+ggplot(filter(players.sub, purchaser_30 == TRUE), aes(x = SESHTIME, y = TOTALSINKS)) +
+  geom_point(aes(color = PURCHASES_30), alpha = 0.3) +
+  geom_density2d(colour="white", bins=5)
+
+ggplot(filter(players.sub, purchaser_30 == FALSE), aes(x = SESHTIME, y = TOTALSINKS)) +
+  geom_point(alpha = 0.3) +
+  geom_density2d(colour="white", bins=5)
