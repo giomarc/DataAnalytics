@@ -307,9 +307,33 @@ plot(players.ridge.lasso, xvar = 'dev', label = TRUE)
 
 players.eln  <- data.frame(actual = players.test$PURCHASES_30)
 ev <- glm.lin.evals(model = players.ridge.lasso, a = players.eln$actual, mod.m = mod.players.test)
-plot(ev)
 
-players.eln$score <- predict(players.ridge.lasso, newx = mod.players.test)[,1]
+plot(ev$nsme, main="Errors of Elastic Net", ylab = "Normalized Mean Square Error")
+
+
+players.eln$score <- predict(players.ridge.lasso, newx = mod.players.test)[,5]
 players.eln$resids <- players.eln$score - players.eln$actual
 
-lm.evals(p = players.eln$score, a = players.eln$actual)
+plot.svd.reg(players.eln, k = players.ridge.lasso$df[5])
+
+# glmnet - logit
+b <- ifelse(players.train$PURCHASES_30 > 0, 1, 0)
+players.logit <- glmnet(mod.players, b, family = 'binomial', nlambda = 20, alpha = 0.5)
+
+plot(players.logit, xvar = 'lambda', label = TRUE)
+plot(players.logit, xvar = 'dev', label = TRUE)
+
+players.eln.logit  <- data.frame(actual = ifelse(players.test$PURCHASES_30 > 0, 1, 0))
+ev.l <- glm.logit.eval(model = players.logit, a = players.eln.logit$actual, mod.m = mod.players.test)
+
+players.eln.logit$score <- predict(players.logit, newx = mod.players.test)[,10]
+players.eln.logit$score <- players.eln.logit$score <- exp(players.eln.logit$score)/(1 + exp(players.eln.logit$score))
+players.eln.logit$class <- ifelse(players.eln.logit$score > 0.5, 1, 0)
+
+require(pROC)
+require(caret)
+
+l.pRoc <- roc(actual ~ score, data = players.eln.logit)
+plot(l.pRoc)
+confusionMatrix(players.eln.logit$class, players.eln.logit$actual)
+
