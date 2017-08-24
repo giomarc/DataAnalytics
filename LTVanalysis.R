@@ -258,7 +258,7 @@ players.test <- players.sub.scale.model[-row.samp,]
 
 #### regression ####
 
-# kitchen sync
+## kitchen sync
 players.base.lm <- lm(PURCHASES_30 ~ ., data = players.train)
 summary(players.base.lm)
 plot(players.base.lm)
@@ -275,7 +275,7 @@ mse.lm <- mean((abs(actuals_preds.lm$predicteds - actuals_preds.lm$actuals))^2)
 base.eval <- lm.evals(p = actuals_preds.lm$predicteds, a = actuals_preds.lm$actuals)
 base.eval
 
-# Step wise 
+## Step wise 
 require(MASS)
 players.step.lm <- stepAIC(players.base.lm, direction = "both")
 players.step.lm$anova
@@ -290,5 +290,26 @@ mse.st <- mean((abs(actuals_preds.st$predicteds - actuals_preds.st$actuals))^2)
 step.eval <- lm.evals(p = actuals_preds.st$predicteds, a = actuals_preds.st$actuals)
 step.eval
 
+## Ridge/Lasso
+require(glmnet)
 
-  
+# set model matrix
+mod.players <- model.matrix(PURCHASES_30 ~. -1, data = players.train)
+mod.players.test <- model.matrix(PURCHASES_30 ~. -1, data = players.test)
+head(mod.players)
+
+# glmnet - elastic net -ridge lasso
+b <- players.train$PURCHASES_30
+players.ridge.lasso <- glmnet(mod.players, b, family = 'gaussian', nlambda = 20, alpha = 0.5)
+
+plot(players.ridge.lasso, xvar = 'lambda', label = TRUE)
+plot(players.ridge.lasso, xvar = 'dev', label = TRUE)
+
+players.eln  <- data.frame(actual = players.test$PURCHASES_30)
+ev <- glm.lin.evals(model = players.ridge.lasso, a = players.eln$actual, mod.m = mod.players.test)
+plot(ev)
+
+players.eln$score <- predict(players.ridge.lasso, newx = mod.players.test)[,1]
+players.eln$resids <- players.eln$score - players.eln$actual
+
+lm.evals(p = players.eln$score, a = players.eln$actual)
