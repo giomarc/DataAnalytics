@@ -41,3 +41,9 @@ plot.dists.cut <- function(a, b, cols = c('pop_A', 'pop_B'), nbins = 1000){
   abline(v = mean(b), lwd = 4, col = 'red')
   par(mfrow = c(1, 1))
 }
+
+plot.hist.single <- function(a, maxs, mins, cols = 'null', nbins = 80, p = 0.05) {
+  breaks = seq(maxs, mins, length.out = (nbins + 1))
+  hist(a, breaks = breaks, main = paste('Histogram of', cols), xlab = cols)
+  abline(v = mean(a), lwd = 4, col = 'red')
+}

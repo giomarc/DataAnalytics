@@ -240,6 +240,7 @@ ggplot(players.sub, aes(x = factor(purchaser_30), y = COMPLETES)) +
 nums <- sapply(players.sub, is.numeric)
 players.sub.scale <- players.sub
 players.sub.scale[, nums] <- lapply(players.sub[, nums], scale)
+players.sub.scale$PURCHASES_30 <- players.sub$PURCHASES_30
 
 
 # remove columns not in model
@@ -264,8 +265,27 @@ plot(players.base.lm)
 AIC(players.base.lm)
 BIC(players.base.lm)
 
+player.base.pred <- predict(players.base.lm, players.test)
+plot.hist.single(player.base.pred, mins = min(player.base.pred), maxs = max(player.base.pred), cols = 'Baseline lin reg Preds.',nbins = 45)
+
+actuals_preds.lm <- data.frame(cbind(actuals = players.test$PURCHASES_30, predicteds = player.base.pred))
+cor_acc.lm <- cor(actuals_preds.lm)
+mse.lm <- mean((abs(actuals_preds.lm$predicteds - actuals_preds.lm$actuals))^2)
+
 # Step wise 
 require(MASS)
 players.step.lm <- stepAIC(players.base.lm, direction = "both")
 players.step.lm$anova
+plot(players.step.lm)
+
+player.step.pred <- predict(players.step.lm, players.test)
+
+actuals_preds.st <- data.frame(cbind(actuals = players.test$PURCHASES_30, predicteds = player.step.pred))
+cor_acc.st <- cor(actuals_preds.st)
+mse.st <- mean((abs(actuals_preds.st$predicteds - actuals_preds.st$actuals))^2)
+
+
+
+
+
   
