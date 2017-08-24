@@ -272,6 +272,9 @@ actuals_preds.lm <- data.frame(cbind(actuals = players.test$PURCHASES_30, predic
 cor_acc.lm <- cor(actuals_preds.lm)
 mse.lm <- mean((abs(actuals_preds.lm$predicteds - actuals_preds.lm$actuals))^2)
 
+base.eval <- lm.evals(p = actuals_preds.lm$predicteds, a = actuals_preds.lm$actuals)
+base.eval
+
 # Step wise 
 require(MASS)
 players.step.lm <- stepAIC(players.base.lm, direction = "both")
@@ -284,8 +287,8 @@ actuals_preds.st <- data.frame(cbind(actuals = players.test$PURCHASES_30, predic
 cor_acc.st <- cor(actuals_preds.st)
 mse.st <- mean((abs(actuals_preds.st$predicteds - actuals_preds.st$actuals))^2)
 
-
-
+step.eval <- lm.evals(p = actuals_preds.st$predicteds, a = actuals_preds.st$actuals)
+step.eval
 
 
   
