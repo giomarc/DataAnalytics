@@ -337,3 +337,46 @@ l.pRoc <- roc(actual ~ score, data = players.eln.logit)
 plot(l.pRoc)
 confusionMatrix(players.eln.logit$class, players.eln.logit$actual)
 
+# Cross validation k-folds cv
+players.logit.cv <- cv.glmnet(mod.players, b, nfolds = 5, family = 'binomial', nlambda = 20, alpha = 0.5)
+
+plot(players.logit.cv)
+coef(players.logit.cv)
+
+players.eln.logit.cv  <- data.frame(actual = ifelse(players.test$PURCHASES_30 > 0, 1, 0))
+players.eln.logit.cv$score <- predict(players.logit.cv, newx = mod.players.test)
+players.eln.logit.cv$score <- players.eln.logit.cv$score <- exp(players.eln.logit.cv$score)/(1 + exp(players.eln.logit.cv$score))
+players.eln.logit.cv$class <- ifelse(players.eln.logit.cv$score > 0.5, 1, 0)
+
+confusionMatrix(players.eln.logit.cv$class, players.eln.logit.cv$actual)
+
+# non-payer capture
+payer.pred <- data.frame(actual = players.eln.logit.cv$actual)
+payer.pred$class.3 <-  ifelse(players.test$PURCHASES_3 > 0, 1, 0)
+payer.pred$class.30 <- players.eln.logit.cv$class
+
+table(payer.pred)
+
+# SMOTE'd with glmnet, logit
+SMOTE.train <- players.train 
+SMOTE.train$purchaser_30 <- factor(ifelse(SMOTE.train$PURCHASES_30 > 0, "yes", "no"))
+SMOTE.train <- SMOTE.train %>% dplyr::select(-PURCHASES_30)
+SMOTE.train <- SMOTE(purchaser_30 ~., sample_frac(SMOTE.train,0.2), k = 3, perc.over = 400, perc.under = 100)
+
+SMOTE.mod.train <- model.matrix(purchaser_30 ~. -1, data = SMOTE.train)
+
+SMOTE.test <- players.test
+SMOTE.test$purchaser_30 <- factor(ifelse(SMOTE.test$PURCHASES_30 > 0, "yes", "no"))
+SMOTE.test <- SMOTE.test %>% dplyr::select(-PURCHASES_30)
+SMOTE.mod.test <- model.matrix(purchaser_30 ~. -1, data = SMOTE.test)
+
+SMOTE.logit.cv <- cv.glmnet(SMOTE.mod.train, SMOTE.train$purchaser_30, nfolds = 5, family = 'binomial', nlambda = 20, alpha = 0.5)
+plot(SMOTE.logit.cv)
+coef(SMOTE.logit.cv)
+
+SMOTE.r  <- data.frame(actual = factor(ifelse(players.test$PURCHASES_30 > 0, "yes", "no")))
+SMOTE.r$score <- predict(SMOTE.logit.cv, newx = SMOTE.mod.test)
+SMOTE.r$score <- SMOTE.r$score <- exp(SMOTE.r$score)/(1 + exp(SMOTE.r$score))
+SMOTE.r$class <- factor(ifelse(SMOTE.r$score > 0.5, "yes", "no"))
+
+confusionMatrix(SMOTE.r$class, SMOTE.r$actual)
