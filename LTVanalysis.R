@@ -25,7 +25,7 @@ players[, "INSTALLDATE"] <- as.Date(players[, "INSTALLDATE"])
 players <- data.frame(lapply(players, function(x) if(is.character(x)) as.factor(x) else x))
 
 #create a purchaser column, fails, success.rate column
-players <- players %>% mutate(purchaser_30 = PURCHASES_30 > 0)
+players <- players %>% mutate(purchaser_30 = (PURCHASES_30-PURCHASES_3) > 0)
 players <- players %>% mutate(purchaser_3 = PURCHASES_3 > 0)
 players <- players %>% mutate(fails = (ATTEMPTS + RETRYS) - COMPLETES)
 players <- players %>% mutate(success.rate = ifelse(ATTEMPTS > 0, COMPLETES/(ATTEMPTS), 0))
@@ -233,6 +233,24 @@ ggplot(players.sub, aes(x = factor(purchaser_30), y = COMPLETES)) +
   xlab('Monetizer')  + ylab('Completes') +
   ggtitle('Completes and 30 day Monetizer')
 
+# violin plots - session time, sessions, 
+
+aggpurch <- aggregate(data = players.sub, PURCHASES_30 ~ purchaser_3 + purchaser_30, mean)
+bw1 = (max(players.sub$PURCHASES_30/10) - min(players.sub$PURCHASES_30))/30
+ggplot(players.sub %>% dplyr::filter(purchaser_30 == TRUE | purchaser_3 == TRUE), aes(PURCHASES_30)) + 
+  geom_histogram(binwidth = bw1) + geom_vline(aes(xintercept = aggpurch[,3]), data = aggpurch, color = "red") +
+  facet_grid(purchaser_30~purchaser_3) +
+  xlab('Purchases')  + ylab('Count') +
+  xlim(0, 75) + 
+  ggtitle('3 day and 30 day Monetizer and purchase volume')
+
+ggplot(players.sub %>% dplyr::filter(purchaser_30 == TRUE | purchaser_3 == TRUE), aes(PURCHASES_30)) + 
+  geom_histogram(binwidth = bw1) + geom_vline(aes(xintercept = aggpurch[,3]), data = aggpurch, color = "red") +
+  facet_grid(purchaser_30~purchaser_3) +
+  xlab('Purchases')  + ylab('Count') +
+  xlim(0, 75) + 
+  ggtitle('3 day and 30 day Monetizer and purchase volume')
+
 ##### prepare for linear regressions #####
 
 
@@ -259,11 +277,13 @@ players.test <- players.sub.scale.model[-row.samp,]
 #### regression ####
 
 ## kitchen sync
-players.base.lm <- lm(PURCHASES_30 ~ ., data = players.train)
+players.base.lm <- lm(scale(PURCHASES_30) ~ ., data = players.train)
 summary(players.base.lm)
 plot(players.base.lm)
 AIC(players.base.lm)
 BIC(players.base.lm)
+
+coef(players.base.lm)
 
 player.base.pred <- predict(players.base.lm, players.test)
 plot.hist.single(player.base.pred, mins = min(player.base.pred), maxs = max(player.base.pred), cols = 'Baseline lin reg Preds.',nbins = 45)
@@ -280,6 +300,9 @@ require(MASS)
 players.step.lm <- stepAIC(players.base.lm, direction = "both")
 players.step.lm$anova
 plot(players.step.lm)
+
+coef(players.step.lm)
+
 
 player.step.pred <- predict(players.step.lm, players.test)
 
@@ -300,7 +323,7 @@ head(mod.players)
 
 # glmnet - elastic net -ridge lasso
 b <- players.train$PURCHASES_30
-players.ridge.lasso <- glmnet(mod.players, b, family = 'gaussian', nlambda = 20, alpha = 0.5)
+players.ridge.lasso <- glmnet(mod.players, scale(b), family = 'gaussian', nlambda = 20, alpha = 0.5)
 
 plot(players.ridge.lasso, xvar = 'lambda', label = TRUE)
 plot(players.ridge.lasso, xvar = 'dev', label = TRUE)
@@ -310,11 +333,12 @@ ev <- glm.lin.evals(model = players.ridge.lasso, a = players.eln$actual, mod.m =
 
 plot(ev$nsme, main="Errors of Elastic Net", ylab = "Normalized Mean Square Error")
 
+coef(players.ridge.lasso)[,17]
 
-players.eln$score <- predict(players.ridge.lasso, newx = mod.players.test)[,5]
+players.eln$score <- predict(players.ridge.lasso, newx = mod.players.test)[,17]
 players.eln$resids <- players.eln$score - players.eln$actual
 
-plot.svd.reg(players.eln, k = players.ridge.lasso$df[5])
+plot.svd.reg(players.eln, k = players.ridge.lasso$df[17])
 
 # glmnet - logit
 b <- ifelse(players.train$PURCHASES_30 > 0, 1, 0)
@@ -335,7 +359,7 @@ require(caret)
 
 l.pRoc <- roc(actual ~ score, data = players.eln.logit)
 plot(l.pRoc)
-confusionMatrix(players.eln.logit$class, players.eln.logit$actual)
+confusionMatrix(players.eln.logit$class, players.eln.logit$actual, positive = 1)
 
 # Cross validation k-folds cv
 players.logit.cv <- cv.glmnet(mod.players, b, nfolds = 5, family = 'binomial', nlambda = 20, alpha = 0.5)
