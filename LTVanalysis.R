@@ -1,6 +1,6 @@
 # load data
 
-file <- "playersample.txt"
+file <- "H:/R/LTV/playersample.txt"
 players <- read.table(file, header = TRUE, stringsAsFactors = FALSE)
 
 
@@ -382,6 +382,7 @@ payer.pred$class.30 <- players.eln.logit.cv$class
 table(payer.pred)
 
 # SMOTE'd with glmnet, logit
+require(DMwR)
 SMOTE.train <- players.train 
 SMOTE.train$purchaser_30 <- factor(ifelse(SMOTE.train$PURCHASES_30 > 0, "yes", "no"))
 SMOTE.train <- SMOTE.train %>% dplyr::select(-PURCHASES_30)
@@ -404,3 +405,33 @@ SMOTE.r$score <- SMOTE.r$score <- exp(SMOTE.r$score)/(1 + exp(SMOTE.r$score))
 SMOTE.r$class <- factor(ifelse(SMOTE.r$score > 0.5, "yes", "no"))
 
 confusionMatrix(SMOTE.r$class, SMOTE.r$actual)
+
+# SMOTE'd with cv.glmnet, linear
+SMOTE.train <- players.train
+SMOTE.train$purchaser_30 <- factor(ifelse(SMOTE.train$PURCHASES_30 > 0, "yes", "no"))
+SMOTE.train <- SMOTE(purchaser_30 ~., SMOTE.train, k = 5, perc.over = 400, perc.under = 100)
+SMOTE.mod.train <- model.matrix(PURCHASES_30 ~. -1, data = (SMOTE.train %>% select(-purchaser_30)))
+
+SMOTE.test <- players.test
+SMOTE.mod.test <- model.matrix(PURCHASES_30 ~. -1, data = SMOTE.test)
+
+SMOTE.lin.cv <- cv.glmnet(SMOTE.mod.train, SMOTE.train$PURCHASES_30, nfolds = 5, family = 'gaussian', nlambda = 20, alpha = 0.5)
+plot(SMOTE.lin.cv)
+coef(SMOTE.lin.cv)
+
+#predict with all lambdas
+SMOTE.lin.score <- predict(SMOTE.lin.cv, newx = SMOTE.mod.test, s = SMOTE.lin.cv$lambda)
+
+#evaluate with all lambda scores
+lin.ev.smote <- data.frame(lapply(as.data.frame(SMOTE.lin.score), lm.evals, a = SMOTE.test$PURCHASES_30))
+lin.ev.smote <- t(lin.ev.smote)
+plot(lin.ev.smote[,2]) 
+
+#min nmse is at lambda[10], use this as the prediction, check residuals
+lin.smote <- data.frame(actual = SMOTE.test$PURCHASES_30)
+lin.smote$score <- predict(SMOTE.lin.cv, newx = SMOTE.mod.test, s = SMOTE.lin.cv$lambda[10])
+lin.smote$resids <- lin.smote$score - lin.smote$actual
+
+plot.svd.reg(lin.smote, k = SMOTE.lin.cv$glmnet.fit$df[10])
+
+
