@@ -434,4 +434,19 @@ lin.smote$resids <- lin.smote$score - lin.smote$actual
 
 plot.svd.reg(lin.smote, k = SMOTE.lin.cv$glmnet.fit$df[10])
 
+###### Naive Bayes #####
 
+# quick and dirty Nb with SMOTE
+
+require(e1071)
+nb.s <- naiveBayes(purchaser_30 ~ ., data = SMOTE.train)
+nb.s.class <- predict(nb.s, SMOTE.test)
+nb.s.score <- predict(nb.s, SMOTE.test, type = "raw")
+
+results <- data.frame(actual = SMOTE.test$purchaser_30, 
+                      predicted = nb.s.class, 
+                      no = nb.s.score[,1], 
+                      yes = nb.s.score[,2])
+ 
+head(results)
+performance(results, 'predicted', 'actual')

@@ -64,3 +64,22 @@ print.confusion <- function(TP, FP, FN, TN){
   print(out)  
 
 }
+
+## Compute the performance metrics of the model
+performance <-  function(df, score, label){ 
+  # Elements of the confusion matrix
+  temp = table(df[, score], df[, label])
+  TP = temp[2,2]
+  FP = temp[2,1]
+  TN = temp[1,1]
+  FN = temp[1,2]  
+  
+  # Compute and print the metrics
+  cat('\n')
+  cat(paste('accuracy =', as.character((TP + TN)/(TP + TN + FP + FN)), '\n'))      
+  cat(paste('precision =', as.character(signif(TP/(TP + FP)), digits = 2)), '\n')     
+  cat(paste('recall =', as.character(TP/(TP + FN))))
+  
+  ## Return confusion matrix
+  temp  
+}
