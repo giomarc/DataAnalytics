@@ -29,7 +29,7 @@ plot.dists <- function(a, b, cols = c('pop_A', 'pop_B'), nbins = 1000){
   par(mfrow = c(1, 1))
 }
 
-plot.dists.cut <- function(a, b, cols = c('pop_A', 'pop_B'), nbins = 1000){
+plot.dists.cut <- function(a, b, cols = c('pop_A', 'pop_B'), nbins = 1000, p = 0.05){
   maxs = max(c(max(a), max(b)))
   mins = min(c(min(a), min(b)))
   maxU <- max(quantile(a, probs = (1 - .05/2)), quantile(b, probs = (1 - .05/2)))
@@ -37,8 +37,12 @@ plot.dists.cut <- function(a, b, cols = c('pop_A', 'pop_B'), nbins = 1000){
   par(mfrow = c(2, 1))
   hist(a, breaks = breaks, main = paste('Histogram of', cols[1]), xlab = cols[1], xlim = c(0, maxU))
   abline(v = mean(a), lwd = 4, col = 'red')
+  abline(v = quantile(a, probs = p/2), lty = 3, col = 'red', lwd = 3)  
+  abline(v = quantile(a, probs = (1 - p/2)), lty = 3, col = 'red', lwd = 3)
   hist(b, breaks = breaks, main = paste('Histogram of', cols[2]), xlab = cols[2], xlim = c(0, maxU))
   abline(v = mean(b), lwd = 4, col = 'red')
+  abline(v = quantile(b, probs = p/2), lty = 3, col = 'red', lwd = 3)  
+  abline(v = quantile(b, probs = (1 - p/2)), lty = 3, col = 'red', lwd = 3)
   par(mfrow = c(1, 1))
 }
 
